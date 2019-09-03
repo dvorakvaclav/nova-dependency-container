@@ -39,8 +39,20 @@
 				root.$children.forEach(component => {
 					if (this.componentIsDependency(component)) {
 
-						component.$watch('value', (value) => {
-							this.dependencyValues[component.field.attribute] = value;
+						let attrname = this.field.watchable.name,
+								attrpath = this.field.watchable.path;
+
+						component.$watch(attrname, (value) => {
+							let result = null
+							if (attrpath) {
+								result = (value && typeof value === 'object'
+										&& value.hasOwnProperty(attrpath))
+										? value[attrpath]
+										: null
+							} else {
+								result = value
+							}
+							this.dependencyValues[component.field.attribute] = result;
 							this.updateDependencyStatus()
 						}, {immediate: true})
 
