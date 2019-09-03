@@ -2,6 +2,7 @@
 
 namespace Epartment\NovaDependencyContainer;
 
+use Illuminate\Database\Eloquent\Model;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -77,7 +78,17 @@ class NovaDependencyContainer extends Field
 
             if(array_key_exists('values', $dependency)) {
                 foreach($dependency['values'] as $value) {
-                    if ($value == $resource->{$dependency['field']}) {
+                    ob_start();
+                    var_dump($resource->{$dependency['field']});
+                    $result = ob_get_clean();
+                    file_put_contents(__DIR__."/dump.txt", $result);
+
+                    $id = $resource->{$dependency['field']};
+                    if($id instanceof Model) {
+                        $id = $id->id;
+                    }
+
+                    if ($value == $id) {
                         $this->meta['dependencies'][$index]['satisfied'] = true;
                     }
                 }
@@ -115,7 +126,7 @@ class NovaDependencyContainer extends Field
             $field->fill($request, $model);
         }
     }
-    
+
     public function setWatchable($name, $path=null)
     {
         return $this->withMeta(['watchable' => (object) ['name' => $name, 'path' => $path]]);
